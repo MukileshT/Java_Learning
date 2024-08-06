@@ -1,7 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 
-class calculator extends WindowAdapter implements ActionListener {
+class Calculator extends WindowAdapter implements ActionListener {
     Frame f = new Frame();
     TextField displayTextField = new TextField();
 
@@ -28,12 +28,12 @@ class calculator extends WindowAdapter implements ActionListener {
      * buttonArray[16] = decimalPoint
      * buttonArray[17] = equals
      */
-    
-    public float number1 = 0, number2 = 0, result = 0, tempNumber = 0;
+
+    public float number1 = 0, number2 = 0, result = 0;
     public String operation, operator = "\0";
     public boolean div_error = false;
 
-    public calculator() {
+    public Calculator() {
         for (int i = 0; i < labelArray.length; i++) {
             buttonArray[i] = new Button(labelArray[i]);
             f.add(buttonArray[i]);
@@ -82,36 +82,38 @@ class calculator extends WindowAdapter implements ActionListener {
         }
 
         if (getString.equals("+") || getString.equals("-") || getString.equals("*") || getString.equals("/")) {
-
-            number1 = Float.parseFloat(displayTextField.getText());
+            try {
+                number1 = Float.parseFloat(displayTextField.getText());
+            } catch (NumberFormatException ex) {
+                displayTextField.setText("Error");
+                return;
+            }
             displayTextField.setText("");
             operation = getString;
 
-            if (operator != "\0") {
+            if (!operator.equals("\0")) {
                 switch (operator) {
                     case "+":
-                        result = result + tempNumber + number1;
+                        result += number1;
                         break;
                     case "-":
-                        result = result - tempNumber - number1;
+                        result -= number1;
                         break;
                     case "*":
-                        result = ((result == 0) ? 1 : result);
-                        tempNumber = ((tempNumber == 0) ? 1 : tempNumber);
-                        result = (result * tempNumber) * number1;
+                        result *= number1;
                         break;
                     case "/":
-                        result = ((result == 0) ? 1 : result);
-                        tempNumber = ((tempNumber == 0) ? 1 : tempNumber);
-                        result = (result / tempNumber) / number1;
+                        if (number1 != 0)
+                            result /= number1;
+                        else
+                            div_error = true;
                         break;
                     default:
-                        System.out.println("error ");
+                        displayTextField.setText("Error: No operator selected");
                         break;
                 }
-                tempNumber = 0;
             } else {
-                tempNumber = number1;
+                result = number1;
             }
             operator = operation;
         }
@@ -121,6 +123,9 @@ class calculator extends WindowAdapter implements ActionListener {
             number2 = 0;
             result = 0;
             displayTextField.setText("");
+            operation = "\0";
+            operator = "\0";
+            div_error = false;
         }
         if (e.getSource() == buttonArray[15]) {
             String a = displayTextField.getText();
@@ -130,20 +135,27 @@ class calculator extends WindowAdapter implements ActionListener {
             }
         }
         if (e.getSource() == buttonArray[17]) {
-            number2 = Float.parseFloat(displayTextField.getText());
+            try {
+                number2 = Float.parseFloat(displayTextField.getText());
+            } catch (NumberFormatException ex) {
+                displayTextField.setText("Error");
+                return;
+            }
             switch (operation) {
                 case "+":
-                    result = ((tempNumber != 0) ? (tempNumber + number2) : (result + number2));
+                    result += number2;
                     break;
                 case "-":
-                    result = ((tempNumber != 0) ? (tempNumber - number2) : (result + number2));
+                    result -= number2;
                     break;
                 case "*":
-                    result = ((tempNumber != 0) ? (tempNumber * number2) : (result + number2));
+                    result *= number2;
                     break;
                 case "/":
-                    result = ((number2 != 0) ? (tempNumber / number2) : 0);
-                    div_error = ((result == 0) ? true : false);
+                    if (number2 != 0)
+                        result /= number2;
+                    else
+                        div_error = true;
                     break;
                 default:
                     break;
@@ -151,7 +163,7 @@ class calculator extends WindowAdapter implements ActionListener {
             if (!div_error) {
                 displayTextField.setText(String.valueOf(result));
             } else {
-                displayTextField.setText("Division by zero is not possible");
+                displayTextField.setText("Infinity");
                 div_error = false;
             }
             operation = "\0";
@@ -160,6 +172,6 @@ class calculator extends WindowAdapter implements ActionListener {
     }
 
     public static void main(String[] args) {
-        new calculator();
+        new Calculator();
     }
 }
